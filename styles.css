@@ -9,7 +9,7 @@
   --text: #222;
   --danger: #e53935;
   --success: #2e7d32;
-  --muted: #6c6c6c;
+  --muted: #666;
 }
 
 *,
@@ -22,9 +22,8 @@ html,
 body {
   margin: 0;
   padding: 0;
-  height: 100%;
-  font-family: "Montserrat", system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
   background: linear-gradient(to bottom, var(--yellow-soft), #ffffff);
+  font-family: "Montserrat", -apple-system, BlinkMacSystemFont, sans-serif;
   color: var(--text);
 }
 
@@ -43,28 +42,25 @@ body {
 
 .app-header {
   display: flex;
-  align-items: center;
   justify-content: space-between;
-  gap: 8px;
-  margin-bottom: 8px;
+  align-items: center;
+  margin-bottom: 10px;
 }
 
 .title-block h1 {
-  font-size: 1.6rem;
   margin: 0;
+  font-size: 1.8rem;
   color: var(--blue-dark);
 }
 
 .subtitle {
-  font-size: 0.85rem;
   margin: 4px 0 0;
+  font-size: 0.9rem;
   color: var(--muted);
 }
 
 .minion-wrapper {
   width: 80px;
-  display: flex;
-  justify-content: center;
 }
 
 .minion-bounce {
@@ -73,10 +69,10 @@ body {
 }
 
 .minion {
-  width: 48px;
-  height: 72px;
-  border-radius: 24px;
+  width: 50px;
+  height: 74px;
   background: var(--yellow);
+  border-radius: 24px;
   position: relative;
   overflow: hidden;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
@@ -85,18 +81,18 @@ body {
 .minion::before {
   content: "";
   position: absolute;
+  top: 45%;
   left: 0;
   right: 0;
-  top: 45%;
   height: 38%;
   background: var(--blue-light);
 }
 
 .minion-eye-band {
   position: absolute;
+  top: 22px;
   left: 0;
   right: 0;
-  top: 22px;
   height: 10px;
   background: #555;
 }
@@ -106,21 +102,21 @@ body {
   top: 16px;
   left: 50%;
   transform: translateX(-50%);
-  width: 26px;
-  height: 26px;
-  border-radius: 50%;
+  width: 28px;
+  height: 28px;
   background: #fff;
+  border-radius: 50%;
   border: 3px solid #ccc;
   display: flex;
-  align-items: center;
   justify-content: center;
+  align-items: center;
 }
 
 .minion-eye-inner {
-  width: 10px;
-  height: 10px;
-  border-radius: 50%;
+  width: 11px;
+  height: 11px;
   background: #3c2f2f;
+  border-radius: 50%;
 }
 
 .minion-mouth {
@@ -137,63 +133,48 @@ body {
 }
 
 @keyframes bounce {
-  0%,
-  100% {
-    transform: translateY(0);
-  }
-  40% {
-    transform: translateY(-6px);
-  }
+  0%, 100% { transform: translateY(0); }
+  40% { transform: translateY(-6px); }
 }
 
-/* CARDS / LAYOUT */
+/* CARD */
 
 .card {
   background: var(--card-bg);
   border-radius: 16px;
   padding: 16px;
+  margin-bottom: 12px;
   box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08);
-  margin-bottom: 10px;
 }
 
 .card h2 {
   margin: 0 0 8px;
-  font-size: 1.2rem;
+  font-size: 1.25rem;
 }
 
 /* FIELDS */
 
 .field {
-  margin-top: 12px;
+  margin-bottom: 12px;
 }
 
 .field-label {
-  display: block;
   font-weight: 600;
   margin-bottom: 6px;
-  font-size: 0.95rem;
 }
 
 input,
 select {
   width: 100%;
-  padding: 9px 10px;
+  padding: 10px 12px;
   border-radius: 10px;
   border: 1px solid #ccc;
-  font-size: 1rem;
+  font-size: 1.05rem;
 }
 
 .players-inputs input {
   margin-bottom: 6px;
 }
-
-.hint {
-  font-size: 0.8rem;
-  color: var(--muted);
-  margin-top: 4px;
-}
-
-/* TOGGLE */
 
 .toggle-group {
   display: flex;
@@ -202,13 +183,12 @@ select {
 
 .toggle-btn {
   flex: 1;
+  padding: 10px 14px;
   border-radius: 12px;
   border: 2px solid var(--blue-light);
-  padding: 8px 10px;
-  background: #fff;
   font-weight: 600;
+  background: #fff;
   cursor: pointer;
-  font-size: 0.95rem;
 }
 
 .toggle-btn.active {
@@ -220,13 +200,12 @@ select {
 
 .btn {
   border-radius: 12px;
-  padding: 11px 12px;
+  padding: 12px;
   border: none;
   font-weight: 600;
-  font-size: 0.95rem;
   cursor: pointer;
-  margin-top: 12px;
-  text-align: center;
+  font-size: 1rem;
+  margin-top: 10px;
 }
 
 .btn.primary {
@@ -250,51 +229,36 @@ select {
   width: 100%;
 }
 
-/* GAME VIEW */
-
-.game-card {
-  padding-top: 12px;
-}
+/* GAME HEADER */
 
 .game-header {
   display: grid;
   grid-template-columns: 1.2fr 0.9fr;
-  gap: 8px;
+  gap: 6px;
   align-items: center;
-  margin-bottom: 8px;
 }
 
-.game-header .badge {
-  grid-column: 1 / 2;
+.badge {
+  background: var(--yellow);
+  padding: 4px 10px;
+  border-radius: 999px;
+  font-weight: 600;
+  font-size: 0.8rem;
+  color: var(--blue-dark);
 }
 
 .round-label,
 .target-label {
-  font-size: 0.85rem;
+  font-size: 0.9rem;
   color: var(--muted);
-}
-
-.target-label {
-  text-align: right;
-}
-
-.badge {
-  display: inline-flex;
-  align-items: center;
-  padding: 4px 8px;
-  border-radius: 999px;
-  background: var(--yellow);
-  color: var(--blue-dark);
-  font-weight: 600;
-  font-size: 0.8rem;
 }
 
 /* SCOREBOARD */
 
 .scoreboard {
   display: flex;
+  gap: 12px;
   flex-direction: column;
-  gap: 10px;
 }
 
 .scorecard {
@@ -307,8 +271,8 @@ select {
 .scorecard-row {
   display: grid;
   grid-template-columns: 2.2fr 1fr 1.2fr;
-  padding: 7px 9px;
-  font-size: 0.9rem;
+  padding: 9px 10px;
+  font-size: 1rem;
 }
 
 .scorecard-header {
@@ -325,75 +289,66 @@ select {
 }
 
 .scorecard-row button.row-select {
-  width: 100%;
-  border-radius: 999px;
   border: none;
   background: transparent;
-  padding: 4px 6px;
-  font-size: 0.9rem;
+  font-size: 1rem;
   text-align: left;
   cursor: pointer;
 }
 
 .scorecard-row.active {
-  background: #e8f1ff;
+  background: #e8f1ff !important;
 }
 
-.scorecard-row .round-val {
+.round-val {
   font-weight: 600;
 }
 
 /* KEYPAD */
 
 .keypad-card {
-  border-radius: 12px;
+  background: #f5faff;
   border: 1px solid var(--border);
-  padding: 10px;
-  background: #f9fbff;
+  border-radius: 12px;
+  padding: 14px;
 }
 
 .keypad-header {
   display: flex;
   justify-content: space-between;
-  margin-bottom: 8px;
-  gap: 10px;
+  margin-bottom: 12px;
 }
 
 .keypad-label {
-  font-size: 0.75rem;
+  font-size: 0.9rem;
   color: var(--muted);
 }
 
 .keypad-player {
-  font-weight: 600;
-  font-size: 0.95rem;
-}
-
-.keypad-value-wrapper {
-  text-align: right;
+  font-size: 1.2rem;
+  font-weight: 700;
 }
 
 .keypad-value {
+  font-size: 1.7rem;
   font-weight: 700;
-  font-size: 1.3rem;
-  min-width: 40px;
+  min-width: 50px;
 }
 
 .keypad-grid {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 8px;
-  margin-top: 4px;
+  gap: 12px;
 }
 
 .key-btn {
-  padding: 10px 0;
-  border-radius: 12px;
+  padding: 16px 0;
+  border-radius: 14px;
   border: none;
   background: #ffffff;
+  font-size: 1.4rem;
+  font-weight: 700;
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.12);
-  font-size: 1.1rem;
-  font-weight: 600;
   cursor: pointer;
 }
 
@@ -401,70 +356,32 @@ select {
   background: #eef2ff;
 }
 
-.keypad-actions {
-  display: flex;
-  justify-content: flex-end;
-  gap: 8px;
-  margin-top: 8px;
-}
-
-.chip-btn {
-  padding: 6px 10px;
-  border-radius: 999px;
-  border: none;
-  background: var(--blue-light);
-  color: #fff;
-  font-size: 0.85rem;
-  font-weight: 600;
-  cursor: pointer;
-}
-
-/* CONTROLS */
-
-.controls {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-  margin-top: 10px;
-}
-
 /* HISTORY */
 
 .history-section {
-  margin-top: 10px;
+  margin-top: 14px;
 }
 
 .history-header {
   display: flex;
   justify-content: space-between;
   align-items: baseline;
-  gap: 8px;
-}
-
-.history-header h3 {
-  margin: 0;
-  font-size: 1rem;
-}
-
-.history-info {
-  font-size: 0.75rem;
-  color: var(--muted);
 }
 
 .history-list {
-  margin-top: 6px;
-  max-height: 150px;
-  overflow-y: auto;
-  border-radius: 10px;
+  margin-top: 8px;
   border: 1px solid var(--border);
   padding: 6px;
-  background: #fdfdfd;
+  border-radius: 12px;
+  max-height: 170px;
+  overflow-y: auto;
+  background: #fff;
 }
 
 .history-item {
-  font-size: 0.8rem;
-  padding: 4px 2px;
-  border-bottom: 1px dashed #eee;
+  padding: 5px;
+  font-size: 0.9rem;
+  border-bottom: 1px dashed #ddd;
 }
 
 .history-item:last-child {
@@ -475,90 +392,112 @@ select {
 
 .results {
   margin-top: 14px;
-  border-radius: 12px;
   border: 2px dashed var(--blue-light);
-  padding: 12px;
+  padding: 14px;
+  border-radius: 16px;
   background: #f5faff;
-}
-
-.results h2 {
-  margin: 0 0 4px;
 }
 
 .results-table {
   width: 100%;
+  margin-top: 8px;
   border-collapse: collapse;
-  margin-top: 6px;
-  font-size: 0.9rem;
+  font-size: 1rem;
 }
 
-.results-table th,
-.results-table td {
-  padding: 4px 4px;
-  border-bottom: 1px solid #e0e0e0;
-}
-
+.results-table td,
 .results-table th {
-  text-align: left;
-  font-weight: 600;
+  padding: 6px 4px;
+  border-bottom: 1px solid #ececec;
 }
 
 .pill-winner {
-  padding: 2px 8px;
-  border-radius: 999px;
   background: #c8e6c9;
   color: var(--success);
-  font-size: 0.75rem;
+  padding: 4px 10px;
+  border-radius: 999px;
   font-weight: 600;
 }
 
 .pill-loser {
-  padding: 2px 8px;
-  border-radius: 999px;
   background: #ffcdd2;
   color: var(--danger);
-  font-size: 0.75rem;
+  padding: 4px 10px;
+  border-radius: 999px;
   font-weight: 600;
 }
 
 /* EXPORT */
 
-.export-section {
-  margin-top: 10px;
-}
-
 .export-text {
   width: 100%;
-  min-height: 80px;
+  min-height: 90px;
   border-radius: 10px;
   border: 1px solid var(--border);
-  padding: 8px;
-  font-family: inherit;
-  font-size: 0.8rem;
+  padding: 10px;
+  font-size: 0.9rem;
   resize: vertical;
+  background: #fff;
 }
 
 .export-actions {
+  margin-top: 10px;
   display: flex;
-  gap: 6px;
-  flex-wrap: wrap;
-  margin-top: 6px;
+  gap: 8px;
 }
 
-.minion-quote {
-  margin-top: 10px;
-  font-size: 0.85rem;
+/* WINNER ANIMATION */
+
+.winner-animation {
+  margin-top: 20px;
+  text-align: center;
+  position: relative;
+}
+
+.winner-gif {
+  width: 180px;
+  margin-bottom: 10px;
+}
+
+.bubble {
+  position: relative;
+  display: inline-block;
+  background: var(--yellow);
+  padding: 10px 14px;
+  border-radius: 18px;
+  font-weight: 700;
+  font-size: 1.3rem;
   color: var(--blue-dark);
+}
+
+.bubble::after {
+  content: "";
+  position: absolute;
+  left: 35px;
+  bottom: -14px;
+  border-width: 14px 14px 0;
+  border-style: solid;
+  border-color: var(--yellow) transparent;
+}
+
+#confetti-canvas {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
 }
 
 /* RESPONSIVE */
 
 @media (max-width: 380px) {
-  .app-header {
-    flex-direction: column;
-    align-items: flex-start;
+  .title-block h1 {
+    font-size: 1.5rem;
   }
-  .game-header {
-    grid-template-columns: 1fr 1fr;
+
+  .key-btn {
+    padding: 14px 0;
+    font-size: 1.3rem;
   }
 }
