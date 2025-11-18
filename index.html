@@ -4,90 +4,179 @@
   <meta charset="UTF-8" />
   <title>Blanka's Scorekeeper</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <link rel="stylesheet" href="styles.css">
-  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="styles.css" />
 </head>
 <body>
-<div class="app">
-  <h1>Blanka's Scorekeeper</h1>
-  <div class="subtitle">Mimoňské zapisování skóre 🎲🃏</div>
-
-  <div id="setup-card" class="card">
-    <div class="minion-row">
-      <div class="minion">
-        <div class="minion-eye-band"></div>
-        <div class="minion-eye"><div class="minion-eye-inner"></div></div>
-        <div class="minion-mouth"></div>
+  <div class="app">
+    <header class="app-header">
+      <div class="title-block">
+        <h1>Blanka's Scorekeeper</h1>
+        <p class="subtitle">Mimoňské skóre pro kostky 🟨 a karty 🟦</p>
       </div>
-      <div class="minion-info">Ahoooj! Nastav hráče a vyber hru. Jdu na to s tebou! 😄</div>
-    </div>
-
-    <div class="field">
-      <div class="section-title">👥 Počet hráčů</div>
-      <select id="player-count">
-        <option value="2">2 hráči</option>
-        <option value="3">3 hráči</option>
-        <option value="4">4 hráči</option>
-        <option value="5">5 hráčů</option>
-        <option value="6">6 hráčů</option>
-      </select>
-    </div>
-
-    <div class="field">
-      <div class="section-title">🧾 Jména hráčů</div>
-      <div id="players-inputs"></div>
-    </div>
-
-    <div class="field">
-      <div class="section-title">🎮 Typ hry</div>
-      <div class="toggle-group">
-        <button class="toggle-btn active" data-game="dice">🎲 Kostky</button>
-        <button class="toggle-btn" data-game="cards">🃏 Karty</button>
+      <div class="minion-wrapper">
+        <!-- jednoduchá “gif-like” animace mimona -->
+        <div class="minion-bounce">
+          <div class="minion">
+            <div class="minion-eye-band"></div>
+            <div class="minion-eye">
+              <div class="minion-eye-inner"></div>
+            </div>
+            <div class="minion-mouth"></div>
+          </div>
+        </div>
       </div>
-    </div>
+    </header>
 
-    <div class="field">
-      <label>Hrací hranice</label>
-      <input id="target-score" type="number" min="1" placeholder="Např. 100" />
-    </div>
+    <!-- SETUP SCREEN -->
+    <section id="setup-card" class="card">
+      <h2>Nastavení hry</h2>
 
-    <button id="start-btn" class="btn">Začít hru</button>
+      <div class="field">
+        <label class="field-label">Počet hráčů</label>
+        <select id="player-count">
+          <option value="2">2 hráči</option>
+          <option value="3">3 hráči</option>
+          <option value="4">4 hráči</option>
+          <option value="5">5 hráčů</option>
+          <option value="6">6 hráčů</option>
+        </select>
+      </div>
+
+      <div class="field">
+        <label class="field-label">Jména hráčů</label>
+        <div id="players-inputs" class="players-inputs"></div>
+      </div>
+
+      <div class="field">
+        <label class="field-label">Typ hry</label>
+        <div class="toggle-group">
+          <button class="toggle-btn active" data-game="dice">🎲 Kostky</button>
+          <button class="toggle-btn" data-game="cards">🃏 Karty</button>
+        </div>
+        <p class="hint">
+          Kostky: cílem je přesně trefit hranici.<br />
+          Karty: cílem je mít co nejméně bodů, tahy přes hranici se nezapočítávají.
+        </p>
+      </div>
+
+      <div class="field">
+        <label class="field-label">Hrací hranice</label>
+        <input id="target-score" type="number" min="1" placeholder="Např. 100" />
+        <p class="hint">
+          Kostky: vyhrává ten, kdo má <strong>přesně</strong> tuto hodnotu.<br />
+          Karty: do této hodnoty se smí počítat, víc už ne.
+        </p>
+      </div>
+
+      <button id="start-btn" class="btn primary">Začít hru</button>
+    </section>
+
+    <!-- GAME SCREEN -->
+    <section id="game-card" class="card game-card" style="display:none;">
+      <header class="game-header">
+        <div class="badge" id="badge-game"></div>
+        <div class="round-label" id="round-label"></div>
+        <div class="target-label" id="target-label"></div>
+      </header>
+
+      <!-- SCOREBOARD -->
+      <div class="scoreboard">
+        <div class="scorecard">
+          <div class="scorecard-header">
+            <div>Hráč</div>
+            <div class="center">Celkem</div>
+            <div class="center">V kole</div>
+          </div>
+          <div id="score-rows"></div>
+        </div>
+
+        <!-- ON-SCREEN KEYPAD -->
+        <div class="keypad-card">
+          <div class="keypad-header">
+            <div>
+              <div class="keypad-label">Aktuální hráč</div>
+              <div id="active-player-name" class="keypad-player">–</div>
+            </div>
+            <div class="keypad-value-wrapper">
+              <div class="keypad-label">Hodnota v kole</div>
+              <div id="active-player-value" class="keypad-value">0</div>
+            </div>
+          </div>
+
+          <div class="keypad-grid">
+            <button class="key-btn" data-key="1">1</button>
+            <button class="key-btn" data-key="2">2</button>
+            <button class="key-btn" data-key="3">3</button>
+            <button class="key-btn" data-key="4">4</button>
+            <button class="key-btn" data-key="5">5</button>
+            <button class="key-btn" data-key="6">6</button>
+            <button class="key-btn" data-key="7">7</button>
+            <button class="key-btn" data-key="8">8</button>
+            <button class="key-btn" data-key="9">9</button>
+            <button class="key-btn light" data-key="C">C</button>
+            <button class="key-btn" data-key="0">0</button>
+            <button class="key-btn light" data-key="⌫">⌫</button>
+          </div>
+
+          <div class="keypad-actions">
+            <button class="chip-btn" data-add="5">+5</button>
+            <button class="chip-btn" data-add="10">+10</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- CONTROLS -->
+      <div class="controls">
+        <button id="confirm-round-btn" class="btn primary wide">Potvrdit kolo</button>
+        <button id="end-game-btn" class="btn secondary">Ukončit hru (karty / ručně)</button>
+        <button id="restart-btn" class="btn ghost" style="display:none;">Nová hra</button>
+      </div>
+
+      <!-- HISTORY -->
+      <section class="history-section">
+        <div class="history-header">
+          <h3>Historie kol</h3>
+          <span id="history-info" class="history-info">Žádná kola zatím.</span>
+        </div>
+        <div id="history-list" class="history-list"></div>
+      </section>
+
+      <!-- RESULTS -->
+      <section id="results" class="results" style="display:none;">
+        <h2 id="results-title"></h2>
+        <p id="results-subtitle"></p>
+
+        <table class="results-table">
+          <thead>
+          <tr>
+            <th>Hráč</th>
+            <th>Body</th>
+            <th>Status</th>
+          </tr>
+          </thead>
+          <tbody id="results-body"></tbody>
+        </table>
+
+        <div class="export-section">
+          <h3>Export výsledků</h3>
+          <p class="hint">
+            Text můžeš zkopírovat do poznámek nebo poslat komukoli.
+          </p>
+          <textarea id="export-text" readonly class="export-text"></textarea>
+          <div class="export-actions">
+            <button id="copy-export-btn" class="btn secondary">Zkopírovat do schránky</button>
+            <button id="download-export-btn" class="btn ghost">Stáhnout jako CSV</button>
+          </div>
+        </div>
+
+        <p class="minion-quote">
+          „Bananaaaa!“ 🍌 – Mimoň gratuluje k dohrané hře.
+        </p>
+      </section>
+    </section>
   </div>
 
-  <div id="game-card" class="card" style="display:none;">
-    <div class="info-bar">
-      <div class="badge" id="badge-game"></div>
-      <div id="round-label"></div>
-    </div>
-
-    <div class="scorecard">
-      <div class="scorecard-header">
-        <div>Hráč</div>
-        <div class="center">Celkem</div>
-        <div class="center">V kole</div>
-      </div>
-      <div id="score-rows"></div>
-    </div>
-
-    <button id="confirm-round-btn" class="btn">Potvrdit kolo</button>
-    <button id="restart-btn" class="btn btn-outline" style="display:none;">Nová hra</button>
-
-    <div id="results" class="results" style="display:none;">
-      <h3 id="results-title"></h3>
-      <p id="results-subtitle"></p>
-
-      <table class="results-table">
-        <thead>
-          <tr><th>Hráč</th><th>Body</th><th>Status</th></tr>
-        </thead>
-        <tbody id="results-body"></tbody>
-      </table>
-
-      <div class="footer-note">Udělěj screenshot! Bananaaaa 🍌</div>
-    </div>
-  </div>
-</div>
-
-<script src="script.js"></script>
+  <script src="script.js" defer></script>
 </body>
 </html>
