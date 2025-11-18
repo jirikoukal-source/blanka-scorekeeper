@@ -330,7 +330,7 @@ select {
 }
 
 .keypad-value {
-  font-size: 1.7rem;
+  font-size: 1.8rem;
   font-weight: 700;
   min-width: 50px;
 }
@@ -346,7 +346,7 @@ select {
   border-radius: 14px;
   border: none;
   background: #ffffff;
-  font-size: 1.4rem;
+  font-size: 1.6rem;
   font-weight: 700;
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.12);
   cursor: pointer;
@@ -456,28 +456,37 @@ select {
 
 .winner-gif {
   width: 180px;
-  margin-bottom: 10px;
+  margin-bottom: 20px;
 }
 
-.bubble {
-  position: relative;
-  display: inline-block;
-  background: var(--yellow);
-  padding: 10px 14px;
-  border-radius: 18px;
-  font-weight: 700;
-  font-size: 1.3rem;
+/* BANANAAAA OVERLAY */
+
+.banana-overlay {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font-size: clamp(2.6rem, 8vw, 4.5rem);
+  font-weight: 900;
   color: var(--blue-dark);
+  text-shadow:
+    0 0 6px rgba(255, 255, 255, 0.9),
+    0 0 18px rgba(0, 0, 0, 0.5);
+  animation: banana-move 1.4s ease-in-out infinite alternate;
+  pointer-events: none;
+  z-index: 999999;
 }
 
-.bubble::after {
-  content: "";
-  position: absolute;
-  left: 35px;
-  bottom: -14px;
-  border-width: 14px 14px 0;
-  border-style: solid;
-  border-color: var(--yellow) transparent;
+@keyframes banana-move {
+  0% {
+    transform: translate(-50%, -55%) scale(0.9) rotate(-3deg);
+  }
+  50% {
+    transform: translate(-50%, -50%) scale(1.07) rotate(3deg);
+  }
+  100% {
+    transform: translate(-50%, -45%) scale(1.02) rotate(-2deg);
+  }
 }
 
 #confetti-canvas {
@@ -498,33 +507,6 @@ select {
 
   .key-btn {
     padding: 14px 0;
-    font-size: 1.3rem;
-  }
-}
-.banana-overlay {
-  position: fixed;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  font-size: clamp(2.6rem, 8vw, 4.2rem);
-  font-weight: 900;
-  color: var(--blue-dark);
-  text-shadow:
-    0 0 6px rgba(255, 255, 255, 0.9),
-    0 0 18px rgba(0, 0, 0, 0.5);
-  animation: banana-move 1.4s ease-in-out infinite alternate;
-  pointer-events: none;
-  z-index: 9999;
-}
-
-@keyframes banana-move {
-  0% {
-    transform: translate(-50%, -55%) scale(0.9) rotate(-3deg);
-  }
-  50% {
-    transform: translate(-50%, -50%) scale(1.05) rotate(3deg);
-  }
-  100% {
-    transform: translate(-50%, -45%) scale(1.0) rotate(-2deg);
+    font-size: 1.4rem;
   }
 }
