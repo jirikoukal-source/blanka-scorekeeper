@@ -4,18 +4,22 @@
   <meta charset="UTF-8" />
   <title>Blanka's Scorekeeper</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
   <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="styles.css" />
 </head>
+
 <body>
   <div class="app">
+
+    <!-- HEADER -->
     <header class="app-header">
       <div class="title-block">
         <h1>Blanka's Scorekeeper</h1>
         <p class="subtitle">Mimoňské skóre pro kostky 🟨 a karty 🟦</p>
       </div>
+
       <div class="minion-wrapper">
-        <!-- jednoduchá “gif-like” animace mimona -->
         <div class="minion-bounce">
           <div class="minion">
             <div class="minion-eye-band"></div>
@@ -28,7 +32,7 @@
       </div>
     </header>
 
-    <!-- SETUP SCREEN -->
+    <!-- SETUP -->
     <section id="setup-card" class="card">
       <h2>Nastavení hry</h2>
 
@@ -54,26 +58,19 @@
           <button class="toggle-btn active" data-game="dice">🎲 Kostky</button>
           <button class="toggle-btn" data-game="cards">🃏 Karty</button>
         </div>
-        <p class="hint">
-          Kostky: cílem je přesně trefit hranici.<br />
-          Karty: cílem je mít co nejméně bodů, tahy přes hranici se nezapočítávají.
-        </p>
       </div>
 
       <div class="field">
         <label class="field-label">Hrací hranice</label>
         <input id="target-score" type="number" min="1" placeholder="Např. 100" />
-        <p class="hint">
-          Kostky: vyhrává ten, kdo má <strong>přesně</strong> tuto hodnotu.<br />
-          Karty: do této hodnoty se smí počítat, víc už ne.
-        </p>
       </div>
 
       <button id="start-btn" class="btn primary">Začít hru</button>
     </section>
 
-    <!-- GAME SCREEN -->
+    <!-- GAME -->
     <section id="game-card" class="card game-card" style="display:none;">
+
       <header class="game-header">
         <div class="badge" id="badge-game"></div>
         <div class="round-label" id="round-label"></div>
@@ -91,13 +88,14 @@
           <div id="score-rows"></div>
         </div>
 
-        <!-- ON-SCREEN KEYPAD -->
+        <!-- KEYPAD -->
         <div class="keypad-card">
           <div class="keypad-header">
             <div>
               <div class="keypad-label">Aktuální hráč</div>
               <div id="active-player-name" class="keypad-player">–</div>
             </div>
+
             <div class="keypad-value-wrapper">
               <div class="keypad-label">Hodnota v kole</div>
               <div id="active-player-value" class="keypad-value">0</div>
@@ -117,11 +115,6 @@
             <button class="key-btn light" data-key="C">C</button>
             <button class="key-btn" data-key="0">0</button>
             <button class="key-btn light" data-key="⌫">⌫</button>
-          </div>
-
-          <div class="keypad-actions">
-            <button class="chip-btn" data-add="5">+5</button>
-            <button class="chip-btn" data-add="10">+10</button>
           </div>
         </div>
       </div>
@@ -149,30 +142,31 @@
 
         <table class="results-table">
           <thead>
-          <tr>
-            <th>Hráč</th>
-            <th>Body</th>
-            <th>Status</th>
-          </tr>
+            <tr>
+              <th>Hráč</th>
+              <th>Body</th>
+              <th>Status</th>
+            </tr>
           </thead>
           <tbody id="results-body"></tbody>
         </table>
 
         <div class="export-section">
           <h3>Export výsledků</h3>
-          <p class="hint">
-            Text můžeš zkopírovat do poznámek nebo poslat komukoli.
-          </p>
           <textarea id="export-text" readonly class="export-text"></textarea>
+
           <div class="export-actions">
             <button id="copy-export-btn" class="btn secondary">Zkopírovat do schránky</button>
-            <button id="download-export-btn" class="btn ghost">Stáhnout jako CSV</button>
           </div>
         </div>
 
-        <p class="minion-quote">
-          „Bananaaaa!“ 🍌 – Mimoň gratuluje k dohrané hře.
-        </p>
+        <!-- WINNER ANIMATION -->
+        <div id="winner-animation" class="winner-animation" style="display:none;">
+          <img src="https://media.tenor.com/0WZsVwV1RIIAAAAi/minions-yellow.gif" class="winner-gif" />
+          <div class="bubble">BANANAAAAA! 🍌</div>
+          <canvas id="confetti-canvas"></canvas>
+        </div>
+
       </section>
     </section>
   </div>
