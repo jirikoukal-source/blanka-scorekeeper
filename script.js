@@ -1,10 +1,14 @@
-// Stav hry
+// ------------------------------------------------------------
+// STAV HRY
+// ------------------------------------------------------------
 let state = null;
 let gameType = "dice";
 let activePlayerId = null;
 let roundScores = {}; // {playerId: number}
 
-// DOM prvky
+// ------------------------------------------------------------
+// DOM PRVKY
+// ------------------------------------------------------------
 const setupCard = document.getElementById("setup-card");
 const gameCard = document.getElementById("game-card");
 
@@ -41,10 +45,9 @@ const winnerAnimation = document.getElementById("winner-animation");
 const confettiCanvas = document.getElementById("confetti-canvas");
 
 
-// -----------------------------------------------------------------------------------------
-// Pomocné funkce
-// -----------------------------------------------------------------------------------------
-
+// ------------------------------------------------------------
+// START – GENEROVÁNÍ INPUTŮ
+// ------------------------------------------------------------
 function renderPlayerInputs() {
   const count = parseInt(playerCountSelect.value, 10);
   playersInputsContainer.innerHTML = "";
@@ -61,7 +64,10 @@ renderPlayerInputs();
 
 playerCountSelect.addEventListener("change", renderPlayerInputs);
 
-// Změna typu hry
+
+// ------------------------------------------------------------
+// TYP HRY (KOSTKY/KARTY)
+// ------------------------------------------------------------
 toggleButtons.forEach((btn) => {
   btn.addEventListener("click", () => {
     toggleButtons.forEach((b) => b.classList.remove("active"));
@@ -71,10 +77,9 @@ toggleButtons.forEach((btn) => {
 });
 
 
-// -----------------------------------------------------------------------------------------
-// Zahájení hry
-// -----------------------------------------------------------------------------------------
-
+// ------------------------------------------------------------
+// START HRY – VALIDACE + NASTAVENÍ
+// ------------------------------------------------------------
 startBtn.addEventListener("click", () => {
   const count = parseInt(playerCountSelect.value, 10);
   const target = parseInt(document.getElementById("target-score").value, 10);
@@ -116,10 +121,9 @@ startBtn.addEventListener("click", () => {
 });
 
 
-// -----------------------------------------------------------------------------------------
-// Render scoreboard
-// -----------------------------------------------------------------------------------------
-
+// ------------------------------------------------------------
+// RENDER SCORECARD
+// ------------------------------------------------------------
 function renderScoreRows() {
   scoreRows.innerHTML = "";
   state.players.forEach((p) => {
@@ -132,17 +136,15 @@ function renderScoreRows() {
     row.innerHTML = `
       <div><button class="row-select" data-id="${p.id}">${p.name}</button></div>
       <div class="center">${p.total}</div>
-      <div class="center round-val">${roundVal}</div>
+      <div class="center">${roundVal}</div>
     `;
 
     scoreRows.appendChild(row);
   });
 
-  // Výběr hráče kliknutím
   scoreRows.querySelectorAll(".row-select").forEach((btn) => {
     btn.addEventListener("click", () => {
-      const id = parseInt(btn.dataset.id, 10);
-      activePlayerId = id;
+      activePlayerId = parseInt(btn.dataset.id, 10);
       renderScoreRows();
       updateActivePlayerInfo();
     });
@@ -165,22 +167,19 @@ function setRoundScoreForActivePlayer(value) {
 }
 
 
-// -----------------------------------------------------------------------------------------
-// Numerická klávesnice
-// -----------------------------------------------------------------------------------------
-
+// ------------------------------------------------------------
+// NUMERICKÁ KLÁVESNICE
+// ------------------------------------------------------------
 document.querySelectorAll(".key-btn").forEach((btn) => {
   btn.addEventListener("click", () => {
     if (!state || state.finished) return;
-    if (activePlayerId == null) return;
 
     const key = btn.dataset.key;
     const current = roundScores[activePlayerId] ?? 0;
     let nextVal = current;
 
     if (/^\d$/.test(key)) {
-      const asString = current === 0 ? key : current.toString() + key;
-      nextVal = parseInt(asString, 10);
+      nextVal = parseInt(current === 0 ? key : current.toString() + key, 10);
     } else if (key === "C") {
       nextVal = 0;
     } else if (key === "⌫") {
@@ -189,47 +188,14 @@ document.querySelectorAll(".key-btn").forEach((btn) => {
     }
 
     setRoundScoreForActivePlayer(nextVal);
-
-    // PO ZADÁNÍ HODNOTY → automaticky potvrdit hráče
-    autoConfirmPlayer();
   });
 });
 
 
-// -----------------------------------------------------------------------------------------
-// Automatický posun hráčů
-// -----------------------------------------------------------------------------------------
-
-function autoConfirmPlayer() {
-  const gain = roundScores[activePlayerId] ?? 0;
-
-  // Aplikujeme logiku jen pro zobrazení — neukládáme do historie
-  const player = state.players.find((p) => p.id === activePlayerId);
-
-  // Přesun na dalšího
-  const currentIndex = state.players.findIndex((p) => p.id === activePlayerId);
-  const nextIndex = currentIndex + 1;
-
-  // Pokud existuje další hráč → přepnout na něj
-  if (nextIndex < state.players.length) {
-    activePlayerId = state.players[nextIndex].id;
-    updateActivePlayerInfo();
-    renderScoreRows();
-    return;
-  }
-
-  // Pokud to byl poslední hráč → automatické kolo
-  confirmRound();
-}
-
-
-// -----------------------------------------------------------------------------------------
-// Potvrzení kola + logika kostek i karet
-// -----------------------------------------------------------------------------------------
-
-confirmRoundBtn.addEventListener("click", confirmRound);
-
-function confirmRound() {
+// ------------------------------------------------------------
+// POTVRZENÍ KOLA
+// ------------------------------------------------------------
+confirmRoundBtn.addEventListener("click", () => {
   if (!state || state.finished) return;
 
   const entries = state.players.map((p) => ({
@@ -243,7 +209,6 @@ function confirmRound() {
   };
 
   let diceHitExact = false;
-  let diceOvershoot = false;
 
   entries.forEach(({ id, gain }) => {
     const p = state.players.find((pl) => pl.id === id);
@@ -256,8 +221,6 @@ function confirmRound() {
 
       if (newTotal > state.target) {
         appliedGain = 0;
-        after = before;
-        diceOvershoot = true;
       } else {
         after = newTotal;
         p.total = newTotal;
@@ -265,11 +228,9 @@ function confirmRound() {
       }
 
     } else {
-      // Karty
       const newTotal = before + gain;
       if (newTotal > state.target) {
         appliedGain = 0;
-        after = before;
       } else {
         after = newTotal;
         p.total = newTotal;
@@ -288,28 +249,24 @@ function confirmRound() {
   renderHistory();
 
   roundScores = {};
-  activePlayerId = state.players[0].id; // reset na hráče 1
+  activePlayerId = state.players[0].id;
   renderScoreRows();
   updateActivePlayerInfo();
 
-  if (state.gameType === "dice") {
-    if (diceHitExact) {
-      const winners = state.players.filter((p) => p.total === state.target);
-      finishGame(winners);
-      return;
-    }
+  if (state.gameType === "dice" && diceHitExact) {
+    const winners = state.players.filter((p) => p.total === state.target);
+    finishGame(winners);
+    return;
   }
 
-  // Další kolo
   state.round += 1;
   roundLabel.textContent = "Kolo: " + state.round;
-}
+});
 
 
-// -----------------------------------------------------------------------------------------
-// Historie
-// -----------------------------------------------------------------------------------------
-
+// ------------------------------------------------------------
+// HISTORIE
+// ------------------------------------------------------------
 function renderHistory() {
   if (state.history.length === 0) {
     historyInfo.textContent = "Zatím žádná odehraná kola.";
@@ -337,10 +294,9 @@ function renderHistory() {
 }
 
 
-// -----------------------------------------------------------------------------------------
-// Ukončení hry + animace vítěze
-// -----------------------------------------------------------------------------------------
-
+// ------------------------------------------------------------
+// MANUÁLNÍ UKONČENÍ HRY (KARTY)
+// ------------------------------------------------------------
 endGameBtn.addEventListener("click", () => {
   if (!state || state.finished) return;
 
@@ -350,6 +306,10 @@ endGameBtn.addEventListener("click", () => {
   finishGame(winners);
 });
 
+
+// ------------------------------------------------------------
+// FINISH GAME + ANIMACE
+// ------------------------------------------------------------
 function finishGame(winners) {
   state.finished = true;
 
@@ -359,27 +319,23 @@ function finishGame(winners) {
 
   resultsBox.style.display = "block";
 
-  resultsTitle.textContent = winners.length === 1 ? "Máme vítěze! 🎉" : "Více vítězů! 🤝";
+  resultsTitle.textContent =
+    winners.length === 1 ? "Máme vítěze! 🎉" : "Více vítězů! 🤝";
+
   resultsSubtitle.textContent =
-    "Hra ukončena v " +
-    state.round +
-    ". kole • Hranice: " +
-    state.target +
-    " • Typ hry: " +
+    `Hra ukončena v ${state.round}. kole • Hranice: ${state.target} • Typ hry: ` +
     (state.gameType === "dice" ? "Kostky" : "Karty");
 
   resultsBody.innerHTML = "";
   state.players.forEach((p) => {
-    const tr = document.createElement("tr");
-
     const isWinner = winners.some((w) => w.id === p.id);
 
+    const tr = document.createElement("tr");
     tr.innerHTML = `
       <td>${p.name}</td>
       <td>${p.total}</td>
       <td>${isWinner ? '<span class="pill-winner">Vítěz</span>' : '-'}</td>
     `;
-
     resultsBody.appendChild(tr);
   });
 
@@ -388,47 +344,43 @@ function finishGame(winners) {
 }
 
 
-// -----------------------------------------------------------------------------------------
-// Export výsledků
-// -----------------------------------------------------------------------------------------
-
+// ------------------------------------------------------------
+// EXPORT TEXTOVĚ
+// ------------------------------------------------------------
 function generateExportText() {
-  let lines = [];
+  let text = "Výsledky hry:\n\n";
 
-  lines.push("Výsledky hry:");
-  lines.push("");
   state.players.forEach((p) => {
-    lines.push(`${p.name}: ${p.total}`);
+    text += `${p.name}: ${p.total}\n`;
   });
 
-  lines.push("");
-  lines.push("Historie:");
-  state.history.forEach((round) => {
-    lines.push(`Kolo ${round.round}`);
-    round.rows.forEach((r) => {
-      lines.push(`  ${r.name}: ${r.before} + ${r.gain} → ${r.after}`);
+  text += "\nHistorie:\n";
+  state.history.forEach((r) => {
+    text += `Kolo ${r.round}:\n`;
+    r.rows.forEach((x) => {
+      text += `  ${x.name}: ${x.before} + ${x.gain} → ${x.after}\n`;
     });
   });
 
-  exportText.value = lines.join("\n");
+  exportText.value = text;
 }
 
 copyExportBtn.addEventListener("click", async () => {
   try {
     await navigator.clipboard.writeText(exportText.value);
-    alert("Zkopírováno do schránky 👍");
-  } catch (err) {
+    alert("Zkopírováno 👍");
+  } catch (e) {
     alert("Nepodařilo se zkopírovat.");
   }
 });
 
 
-// -----------------------------------------------------------------------------------------
-// WINNER ANIMATION (GIF + konfety)
-// -----------------------------------------------------------------------------------------
-
+// ------------------------------------------------------------
+// ANIMACE VÍTĚZE – KONFETY 5 sekund + BANANAAAA overlay
+// ------------------------------------------------------------
 function runWinnerAnimation() {
   winnerAnimation.style.display = "block";
+  confettiCanvas.style.display = "block";
 
   const ctx = confettiCanvas.getContext("2d");
   const w = (confettiCanvas.width = window.innerWidth);
@@ -437,10 +389,12 @@ function runWinnerAnimation() {
   const confetti = Array.from({ length: 150 }).map(() => ({
     x: Math.random() * w,
     y: Math.random() * -h,
-    r: Math.random() * 6 + 4,
-    c: ["#f7d33f", "#3e65cf", "#ffed4a", "#2b6cb0"][Math.floor(Math.random() * 4)],
+    r: Math.random() * 5 + 3,
+    c: ["#f7d33f", "#3e65cf", "#ffeb3b", "#2b6cb0"][Math.floor(Math.random() * 4)],
     s: Math.random() * 2 + 1,
   }));
+
+  let animFrame;
 
   function draw() {
     ctx.clearRect(0, 0, w, h);
@@ -458,17 +412,30 @@ function runWinnerAnimation() {
       }
     });
 
-    requestAnimationFrame(draw);
+    animFrame = requestAnimationFrame(draw);
   }
 
   draw();
+
+  // Velký BANANAAAA text
+  const bananaDiv = document.createElement("div");
+  bananaDiv.className = "banana-overlay";
+  bananaDiv.textContent = "BANANAAAAA!";
+  document.body.appendChild(bananaDiv);
+
+  // Stop after 5 sec
+  setTimeout(() => {
+    cancelAnimationFrame(animFrame);
+    ctx.clearRect(0, 0, w, h);
+    confettiCanvas.style.display = "none";
+    bananaDiv.remove();
+  }, 5000);
 }
 
 
-// -----------------------------------------------------------------------------------------
-// Restart
-// -----------------------------------------------------------------------------------------
-
+// ------------------------------------------------------------
+// RESTART HRY
+// ------------------------------------------------------------
 restartBtn.addEventListener("click", () => {
   location.reload();
 });
