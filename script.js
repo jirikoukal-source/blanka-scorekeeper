@@ -3,27 +3,29 @@ let state = null;
 let gameType = "dice";
 let activePlayerId = null;
 let roundScores = {}; // {playerId: number}
-let audioCtx = null;
 
 // DOM prvky
-const playerCountSelect = document.getElementById("player-count");
-const playersInputsContainer = document.getElementById("players-inputs");
 const setupCard = document.getElementById("setup-card");
 const gameCard = document.getElementById("game-card");
 
+const playerCountSelect = document.getElementById("player-count");
+const playersInputsContainer = document.getElementById("players-inputs");
+
 const toggleButtons = document.querySelectorAll(".toggle-btn");
 const startBtn = document.getElementById("start-btn");
-const confirmRoundBtn = document.getElementById("confirm-round-btn");
-const endGameBtn = document.getElementById("end-game-btn");
-const restartBtn = document.getElementById("restart-btn");
 
 const badgeGame = document.getElementById("badge-game");
 const roundLabel = document.getElementById("round-label");
 const targetLabel = document.getElementById("target-label");
+
 const scoreRows = document.getElementById("score-rows");
 
 const activePlayerNameEl = document.getElementById("active-player-name");
 const activePlayerValueEl = document.getElementById("active-player-value");
+
+const confirmRoundBtn = document.getElementById("confirm-round-btn");
+const endGameBtn = document.getElementById("end-game-btn");
+const restartBtn = document.getElementById("restart-btn");
 
 const historyList = document.getElementById("history-list");
 const historyInfo = document.getElementById("history-info");
@@ -34,37 +36,19 @@ const resultsSubtitle = document.getElementById("results-subtitle");
 const resultsBody = document.getElementById("results-body");
 const exportText = document.getElementById("export-text");
 const copyExportBtn = document.getElementById("copy-export-btn");
-const downloadExportBtn = document.getElementById("download-export-btn");
 
-// Helpers – audio
+const winnerAnimation = document.getElementById("winner-animation");
+const confettiCanvas = document.getElementById("confetti-canvas");
 
-function initAudio() {
-  if (!audioCtx) {
-    const AudioContext = window.AudioContext || window.webkitAudioContext;
-    if (AudioContext) {
-      audioCtx = new AudioContext();
-    }
-  }
-}
 
-function beep({ frequency = 880, duration = 120, type = "sine", volume = 0.15 } = {}) {
-  if (!audioCtx) return;
-  const osc = audioCtx.createOscillator();
-  const gain = audioCtx.createGain();
-  osc.type = type;
-  osc.frequency.value = frequency;
-  gain.gain.value = volume;
-  osc.connect(gain);
-  gain.connect(audioCtx.destination);
-  osc.start();
-  setTimeout(() => osc.stop(), duration);
-}
-
-// Inicializace polí pro jména hráčů
+// -----------------------------------------------------------------------------------------
+// Pomocné funkce
+// -----------------------------------------------------------------------------------------
 
 function renderPlayerInputs() {
   const count = parseInt(playerCountSelect.value, 10);
   playersInputsContainer.innerHTML = "";
+
   for (let i = 0; i < count; i++) {
     const input = document.createElement("input");
     input.type = "text";
@@ -73,9 +57,11 @@ function renderPlayerInputs() {
     playersInputsContainer.appendChild(input);
   }
 }
+renderPlayerInputs();
 
-// Typ hry
+playerCountSelect.addEventListener("change", renderPlayerInputs);
 
+// Změna typu hry
 toggleButtons.forEach((btn) => {
   btn.addEventListener("click", () => {
     toggleButtons.forEach((b) => b.classList.remove("active"));
@@ -84,14 +70,12 @@ toggleButtons.forEach((btn) => {
   });
 });
 
-playerCountSelect.addEventListener("change", renderPlayerInputs);
-renderPlayerInputs();
 
-// Start hry
+// -----------------------------------------------------------------------------------------
+// Zahájení hry
+// -----------------------------------------------------------------------------------------
 
 startBtn.addEventListener("click", () => {
-  initAudio();
-
   const count = parseInt(playerCountSelect.value, 10);
   const target = parseInt(document.getElementById("target-score").value, 10);
 
@@ -131,7 +115,10 @@ startBtn.addEventListener("click", () => {
   historyInfo.textContent = "Zatím žádná odehraná kola.";
 });
 
-// UI – výběr hráče, zobrazení řádků
+
+// -----------------------------------------------------------------------------------------
+// Render scoreboard
+// -----------------------------------------------------------------------------------------
 
 function renderScoreRows() {
   scoreRows.innerHTML = "";
@@ -143,9 +130,7 @@ function renderScoreRows() {
     const roundVal = roundScores[p.id] ?? 0;
 
     row.innerHTML = `
-      <div>
-        <button class="row-select" data-id="${p.id}">${p.name}</button>
-      </div>
+      <div><button class="row-select" data-id="${p.id}">${p.name}</button></div>
       <div class="center">${p.total}</div>
       <div class="center round-val">${roundVal}</div>
     `;
@@ -153,12 +138,11 @@ function renderScoreRows() {
     scoreRows.appendChild(row);
   });
 
-  // Handlery pro výběr hráče
+  // Výběr hráče kliknutím
   scoreRows.querySelectorAll(".row-select").forEach((btn) => {
     btn.addEventListener("click", () => {
       const id = parseInt(btn.dataset.id, 10);
       activePlayerId = id;
-      playTap();
       renderScoreRows();
       updateActivePlayerInfo();
     });
@@ -166,12 +150,7 @@ function renderScoreRows() {
 }
 
 function updateActivePlayerInfo() {
-  if (!state || activePlayerId == null) {
-    activePlayerNameEl.textContent = "–";
-    activePlayerValueEl.textContent = "0";
-    return;
-  }
-
+  if (!state || activePlayerId == null) return;
   const player = state.players.find((p) => p.id === activePlayerId);
   activePlayerNameEl.textContent = player ? player.name : "–";
   activePlayerValueEl.textContent = (roundScores[activePlayerId] ?? 0).toString();
@@ -179,25 +158,23 @@ function updateActivePlayerInfo() {
 
 function setRoundScoreForActivePlayer(value) {
   if (activePlayerId == null) return;
-  const safeVal = Math.max(0, Math.min(999, value)); // rozumný limit
+  const safeVal = Math.max(0, Math.min(999, value));
   roundScores[activePlayerId] = safeVal;
   renderScoreRows();
   updateActivePlayerInfo();
 }
 
-// Keypad
 
-function playTap() {
-  beep({ frequency: 1400, duration: 60, volume: 0.08 });
-}
+// -----------------------------------------------------------------------------------------
+// Numerická klávesnice
+// -----------------------------------------------------------------------------------------
 
 document.querySelectorAll(".key-btn").forEach((btn) => {
   btn.addEventListener("click", () => {
-    if (state?.finished) return;
+    if (!state || state.finished) return;
     if (activePlayerId == null) return;
 
     const key = btn.dataset.key;
-    playTap();
     const current = roundScores[activePlayerId] ?? 0;
     let nextVal = current;
 
@@ -212,30 +189,53 @@ document.querySelectorAll(".key-btn").forEach((btn) => {
     }
 
     setRoundScoreForActivePlayer(nextVal);
+
+    // PO ZADÁNÍ HODNOTY → automaticky potvrdit hráče
+    autoConfirmPlayer();
   });
 });
 
-document.querySelectorAll(".chip-btn").forEach((btn) => {
-  btn.addEventListener("click", () => {
-    if (state?.finished) return;
-    if (activePlayerId == null) return;
-    const add = parseInt(btn.dataset.add, 10);
-    playTap();
-    const current = roundScores[activePlayerId] ?? 0;
-    setRoundScoreForActivePlayer(current + add);
-  });
-});
 
-// Potvrzení kola
+// -----------------------------------------------------------------------------------------
+// Automatický posun hráčů
+// -----------------------------------------------------------------------------------------
 
-confirmRoundBtn.addEventListener("click", () => {
+function autoConfirmPlayer() {
+  const gain = roundScores[activePlayerId] ?? 0;
+
+  // Aplikujeme logiku jen pro zobrazení — neukládáme do historie
+  const player = state.players.find((p) => p.id === activePlayerId);
+
+  // Přesun na dalšího
+  const currentIndex = state.players.findIndex((p) => p.id === activePlayerId);
+  const nextIndex = currentIndex + 1;
+
+  // Pokud existuje další hráč → přepnout na něj
+  if (nextIndex < state.players.length) {
+    activePlayerId = state.players[nextIndex].id;
+    updateActivePlayerInfo();
+    renderScoreRows();
+    return;
+  }
+
+  // Pokud to byl poslední hráč → automatické kolo
+  confirmRound();
+}
+
+
+// -----------------------------------------------------------------------------------------
+// Potvrzení kola + logika kostek i karet
+// -----------------------------------------------------------------------------------------
+
+confirmRoundBtn.addEventListener("click", confirmRound);
+
+function confirmRound() {
   if (!state || state.finished) return;
 
-  // Pokud někdo nemá hodnotu v kole, bereme 0
-  const entries = state.players.map((p) => {
-    const gain = roundScores[p.id] ?? 0;
-    return { id: p.id, gain };
-  });
+  const entries = state.players.map((p) => ({
+    id: p.id,
+    gain: roundScores[p.id] ?? 0,
+  }));
 
   const historyEntry = {
     round: state.round,
@@ -243,10 +243,8 @@ confirmRoundBtn.addEventListener("click", () => {
   };
 
   let diceHitExact = false;
-  let diceWinners = [];
-  let anyDiceOvershoot = false;
+  let diceOvershoot = false;
 
-  // Aplikace skóre
   entries.forEach(({ id, gain }) => {
     const p = state.players.find((pl) => pl.id === id);
     const before = p.total;
@@ -255,20 +253,19 @@ confirmRoundBtn.addEventListener("click", () => {
 
     if (state.gameType === "dice") {
       const newTotal = before + gain;
+
       if (newTotal > state.target) {
-        // překročení – kolo se nepočítá
         appliedGain = 0;
         after = before;
-        anyDiceOvershoot = true;
+        diceOvershoot = true;
       } else {
         after = newTotal;
         p.total = newTotal;
-        if (newTotal === state.target) {
-          diceHitExact = true;
-        }
+        if (newTotal === state.target) diceHitExact = true;
       }
+
     } else {
-      // KARTY – tah přes hranici se nepočítá
+      // Karty
       const newTotal = before + gain;
       if (newTotal > state.target) {
         appliedGain = 0;
@@ -290,109 +287,45 @@ confirmRoundBtn.addEventListener("click", () => {
   state.history.push(historyEntry);
   renderHistory();
 
-  // Vyčištění kolového vstupu
   roundScores = {};
+  activePlayerId = state.players[0].id; // reset na hráče 1
   renderScoreRows();
   updateActivePlayerInfo();
 
-  // Zvuk za overshoot
-  if (state.gameType === "dice" && anyDiceOvershoot) {
-    beep({ frequency: 320, duration: 150, type: "square", volume: 0.15 });
-  }
-
-  // Vyhodnocení – KOSTKY
   if (state.gameType === "dice") {
     if (diceHitExact) {
-      diceWinners = state.players.filter((p) => p.total === state.target);
-      finishGame(diceWinners, []);
+      const winners = state.players.filter((p) => p.total === state.target);
+      finishGame(winners);
       return;
     }
   }
 
-  // Vyhodnocení – KARTY: automaticky NIKDY nekončí,
-  // hráč musí použít tlačítko "Ukončit hru".
+  // Další kolo
   state.round += 1;
   roundLabel.textContent = "Kolo: " + state.round;
-});
-
-// Ukončení hry – hlavně pro KARTY, ale lze použít vždy
-
-endGameBtn.addEventListener("click", () => {
-  if (!state || state.finished) return;
-
-  const minScore = Math.min(...state.players.map((p) => p.total));
-  const winners = state.players.filter((p) => p.total === minScore);
-  const losers = []; // necháme prázdné – jde spíš o vítěze
-
-  finishGame(winners, losers);
-});
-
-// Dokončení hry, export, zvuky
-
-function finishGame(winners, losers) {
-  state.finished = true;
-  confirmRoundBtn.style.display = "none";
-  endGameBtn.style.display = "none";
-  restartBtn.style.display = "block";
-  resultsBox.style.display = "block";
-
-  if (winners.length === 1) {
-    resultsTitle.textContent = "Máme vítěze! 🎉";
-    beep({ frequency: 1040, duration: 200, type: "triangle", volume: 0.2 });
-  } else {
-    resultsTitle.textContent = "Více vítězů! 🤝";
-    beep({ frequency: 900, duration: 200, type: "triangle", volume: 0.2 });
-  }
-
-  resultsSubtitle.textContent =
-    "Hra ukončena v " +
-    state.round +
-    ". kole • Hranice: " +
-    state.target +
-    " • Typ hry: " +
-    (state.gameType === "dice" ? "Kostky" : "Karty");
-
-  resultsBody.innerHTML = "";
-  state.players.forEach((p) => {
-    const row = document.createElement("tr");
-
-    const isWinner = winners.some((w) => w.id === p.id);
-    const isLoser = losers.some((l) => l.id === p.id);
-
-    let status = "-";
-    if (isWinner) status = '<span class="pill-winner">Vítěz</span>';
-    else if (isLoser) status = '<span class="pill-loser">Prohrál</span>';
-
-    row.innerHTML = `
-      <td>${p.name}</td>
-      <td>${p.total}</td>
-      <td>${status}</td>
-    `;
-
-    resultsBody.appendChild(row);
-  });
-
-  generateExportText();
 }
 
-// Historie kol
+
+// -----------------------------------------------------------------------------------------
+// Historie
+// -----------------------------------------------------------------------------------------
 
 function renderHistory() {
-  if (!state || state.history.length === 0) {
-    historyList.innerHTML = "";
+  if (state.history.length === 0) {
     historyInfo.textContent = "Zatím žádná odehraná kola.";
+    historyList.innerHTML = "";
     return;
   }
 
   historyInfo.textContent = "Počet kol: " + state.history.length;
-
   historyList.innerHTML = "";
+
   state.history.forEach((round) => {
-    const roundHeader = document.createElement("div");
-    roundHeader.className = "history-item";
-    roundHeader.style.fontWeight = "600";
-    roundHeader.textContent = "Kolo " + round.round + ":";
-    historyList.appendChild(roundHeader);
+    const head = document.createElement("div");
+    head.className = "history-item";
+    head.style.fontWeight = "600";
+    head.textContent = "Kolo " + round.round + ":";
+    historyList.appendChild(head);
 
     round.rows.forEach((r) => {
       const item = document.createElement("div");
@@ -403,32 +336,75 @@ function renderHistory() {
   });
 }
 
+
+// -----------------------------------------------------------------------------------------
+// Ukončení hry + animace vítěze
+// -----------------------------------------------------------------------------------------
+
+endGameBtn.addEventListener("click", () => {
+  if (!state || state.finished) return;
+
+  const minScore = Math.min(...state.players.map((p) => p.total));
+  const winners = state.players.filter((p) => p.total === minScore);
+
+  finishGame(winners);
+});
+
+function finishGame(winners) {
+  state.finished = true;
+
+  confirmRoundBtn.style.display = "none";
+  endGameBtn.style.display = "none";
+  restartBtn.style.display = "block";
+
+  resultsBox.style.display = "block";
+
+  resultsTitle.textContent = winners.length === 1 ? "Máme vítěze! 🎉" : "Více vítězů! 🤝";
+  resultsSubtitle.textContent =
+    "Hra ukončena v " +
+    state.round +
+    ". kole • Hranice: " +
+    state.target +
+    " • Typ hry: " +
+    (state.gameType === "dice" ? "Kostky" : "Karty");
+
+  resultsBody.innerHTML = "";
+  state.players.forEach((p) => {
+    const tr = document.createElement("tr");
+
+    const isWinner = winners.some((w) => w.id === p.id);
+
+    tr.innerHTML = `
+      <td>${p.name}</td>
+      <td>${p.total}</td>
+      <td>${isWinner ? '<span class="pill-winner">Vítěz</span>' : '-'}</td>
+    `;
+
+    resultsBody.appendChild(tr);
+  });
+
+  generateExportText();
+  runWinnerAnimation();
+}
+
+
+// -----------------------------------------------------------------------------------------
 // Export výsledků
+// -----------------------------------------------------------------------------------------
 
 function generateExportText() {
-  if (!state) return;
-
   let lines = [];
-  lines.push("Blanka's Scorekeeper – výsledky");
-  lines.push(
-    "Typ hry: " +
-      (state.gameType === "dice" ? "Kostky" : "Karty") +
-      ", hranice: " +
-      state.target +
-      ", počet kol: " +
-      state.history.length
-  );
-  lines.push("");
 
-  lines.push("Konečné skóre:");
+  lines.push("Výsledky hry:");
+  lines.push("");
   state.players.forEach((p) => {
     lines.push(`${p.name}: ${p.total}`);
   });
 
   lines.push("");
-  lines.push("Historie kol:");
+  lines.push("Historie:");
   state.history.forEach((round) => {
-    lines.push(`Kolo ${round.round}:`);
+    lines.push(`Kolo ${round.round}`);
     round.rows.forEach((r) => {
       lines.push(`  ${r.name}: ${r.before} + ${r.gain} → ${r.after}`);
     });
@@ -438,41 +414,60 @@ function generateExportText() {
 }
 
 copyExportBtn.addEventListener("click", async () => {
-  if (!navigator.clipboard) {
-    alert("Prohlížeč nepodporuje kopírování do schránky.");
-    return;
-  }
   try {
     await navigator.clipboard.writeText(exportText.value);
-    alert("Výsledky zkopírovány do schránky 👍");
-  } catch (e) {
-    alert("Nepodařilo se zkopírovat do schránky.");
+    alert("Zkopírováno do schránky 👍");
+  } catch (err) {
+    alert("Nepodařilo se zkopírovat.");
   }
 });
 
-downloadExportBtn.addEventListener("click", () => {
-  if (!state) return;
 
-  let csv = "Jmeno,Body\n";
-  state.players.forEach((p) => {
-    csv += `"${p.name}",${p.total}\n`;
-  });
+// -----------------------------------------------------------------------------------------
+// WINNER ANIMATION (GIF + konfety)
+// -----------------------------------------------------------------------------------------
 
-  const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
-  const url = URL.createObjectURL(blob);
+function runWinnerAnimation() {
+  winnerAnimation.style.display = "block";
 
-  const a = document.createElement("a");
-  a.href = url;
-  a.download = "blanka-scorekeeper-vysledky.csv";
-  a.style.display = "none";
-  document.body.appendChild(a);
-  a.click();
-  document.body.removeChild(a);
+  const ctx = confettiCanvas.getContext("2d");
+  const w = (confettiCanvas.width = window.innerWidth);
+  const h = (confettiCanvas.height = window.innerHeight);
 
-  URL.revokeObjectURL(url);
-});
+  const confetti = Array.from({ length: 150 }).map(() => ({
+    x: Math.random() * w,
+    y: Math.random() * -h,
+    r: Math.random() * 6 + 4,
+    c: ["#f7d33f", "#3e65cf", "#ffed4a", "#2b6cb0"][Math.floor(Math.random() * 4)],
+    s: Math.random() * 2 + 1,
+  }));
 
+  function draw() {
+    ctx.clearRect(0, 0, w, h);
+
+    confetti.forEach((f) => {
+      ctx.beginPath();
+      ctx.arc(f.x, f.y, f.r, 0, Math.PI * 2);
+      ctx.fillStyle = f.c;
+      ctx.fill();
+
+      f.y += f.s;
+      if (f.y > h) {
+        f.y = -10;
+        f.x = Math.random() * w;
+      }
+    });
+
+    requestAnimationFrame(draw);
+  }
+
+  draw();
+}
+
+
+// -----------------------------------------------------------------------------------------
 // Restart
+// -----------------------------------------------------------------------------------------
 
 restartBtn.addEventListener("click", () => {
   location.reload();
